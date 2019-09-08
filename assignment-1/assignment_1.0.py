@@ -1,6 +1,8 @@
 # Assignment 1
 # Author : asethi
+# Last updated Sept - 5 - 2019
 
+# Importing packages
 import pandas as pd 
 import numpy as np
 import datetime as dt
@@ -10,6 +12,9 @@ import glob
 from configparser import SafeConfigParser, ConfigParser
 from statsmodels.stats.outliers_influence import variance_inflation_factor    
 from statsmodels.tools.tools import add_constant
+
+# Function to parse source file location from config file
+# And form dataframe by concatenating all source files
 
 def import_source_files(config_file_name):
     #passing config file information for source file path
@@ -26,6 +31,7 @@ def import_source_files(config_file_name):
     return data
 
 
+# Function to engineer features to be used in data modelling
 def feature_engineering(data):
     data['date']        = pd.to_datetime(data['date'])
     data["month"]       = data["date"].dt.month
@@ -44,7 +50,7 @@ def feature_engineering(data):
     #print(data.dtypes)
     return data
 
-
+# Function to assign time of the day, feature engineering continued
 def assign_time_of_day(hour_val):
     if hour_val < 6:
         time = 'sleep_time'
@@ -56,6 +62,7 @@ def assign_time_of_day(hour_val):
         time = 'night_time'
     return time
 
+# Function to calculate variance inflation factor
 
 def calculate_vif(X, thresh):
     
@@ -79,22 +86,28 @@ def calculate_vif(X, thresh):
             dropped = True
     return X.iloc[:, variables]
 
-    
+
+
+# Console 
+# Global variable declarations
+# COnfiguration file name
 config_file_name='loc_config.ini'
+
+# Original set of independent variables
 independent_original=['T1', 'RH_1', 'T2', 'RH_2', 'T3','RH_3', 'T4', 'RH_4', 'T5', 'RH_5', 'T6', 'RH_6', 'T7', 'RH_7', 'T8',
                         'RH_8', 'T9', 'RH_9', 'T_out', 'Press_mm_hg', 'RH_out', 'Windspeed','Visibility', 'Tdewpoint', 'rv1', 'rv2']
 
+# Indepedent variables after feature engineering
 independent_updated=['lights', 'T1', 'RH_1', 'T2', 'RH_2', 'T3','RH_3', 'T4', 'RH_4', 'T5', 'RH_5', 'T6',
     'RH_6', 'T7', 'RH_7', 'T8','RH_8', 'T9', 'RH_9', 'T_out', 'Press_mm_hg', 'RH_out', 'Windspeed','Visibility', 'Tdewpoint',
     'rv1', 'rv2', 'week_num', 'hour_of_day','month_1', 'month_2', 'month_3', 'month_4', 'month_5', 'is_weekend_0','is_weekend_1',
     'time_of_day_morning_time', 'time_of_day_night_time','time_of_day_sleep_time', 'time_of_day_work_hours', 'weekday_0',
     'weekday_1', 'weekday_2', 'weekday_3', 'weekday_4', 'weekday_5','weekday_6']
 
+# Invoking function to import source files
 energy_source_data=import_source_files(config_file_name)
-#print(energy_source_data.shape)
+# Invoking function to create new features
 energy_source_data_features=feature_engineering(energy_source_data)
-#print(energy_source_data_features.columns)
-
-#print(energy_source_data_features.dtypes)
+#Invoking function to calculate variance inflation factor
 energy_source_data_workset=calculate_vif(energy_source_data_features[independent_updated],10.0)
 
