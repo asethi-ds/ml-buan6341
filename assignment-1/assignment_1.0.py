@@ -11,7 +11,9 @@ import os
 import glob
 from configparser import SafeConfigParser, ConfigParser
 from statsmodels.stats.outliers_influence import variance_inflation_factor    
-from statsmodels.tools.tools import add_constant
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+
 
 # Function to parse source file location from config file
 # And form dataframe by concatenating all source files
@@ -87,6 +89,20 @@ def calculate_vif(X, thresh):
     return X.iloc[:, variables]
 
 
+# Function to pre process the data prior to implement regression model
+def data_preprocess(energy_source_data_vif):
+    sc = StandardScaler()
+    X = pd.DataFrame(sc.fit_transform(energy_source_data_vif[columns_scalable]))
+
+    X.columns=columns_scalable
+
+    energy_source_data_workset = pd.concat([X, energy_source_data_vif[non_scalable_columns],energy_source_data[dep_var]], axis=1, sort=False)
+    train_set, test_set = train_test_split(energy_source_data_workset, test_size=0.25)
+    return train_set, test_set
+
+
+
+
 
 # Console 
 # Global variable declarations
@@ -98,16 +114,31 @@ independent_original=['T1', 'RH_1', 'T2', 'RH_2', 'T3','RH_3', 'T4', 'RH_4', 'T5
                         'RH_8', 'T9', 'RH_9', 'T_out', 'Press_mm_hg', 'RH_out', 'Windspeed','Visibility', 'Tdewpoint', 'rv1', 'rv2']
 
 # Indepedent variables after feature engineering
-independent_updated=['lights', 'T1', 'RH_1', 'T2', 'RH_2', 'T3','RH_3', 'T4', 'RH_4', 'T5', 'RH_5', 'T6',
+independent_updated=['T1', 'RH_1', 'T2', 'RH_2', 'T3','RH_3', 'T4', 'RH_4', 'T5', 'RH_5', 'T6',
     'RH_6', 'T7', 'RH_7', 'T8','RH_8', 'T9', 'RH_9', 'T_out', 'Press_mm_hg', 'RH_out', 'Windspeed','Visibility', 'Tdewpoint',
     'rv1', 'rv2', 'week_num', 'hour_of_day','month_1', 'month_2', 'month_3', 'month_4', 'month_5', 'is_weekend_0','is_weekend_1',
     'time_of_day_morning_time', 'time_of_day_night_time','time_of_day_sleep_time', 'time_of_day_work_hours', 'weekday_0',
     'weekday_1', 'weekday_2', 'weekday_3', 'weekday_4', 'weekday_5','weekday_6']
+
+# Feature set that needs to be scaled
+columns_scalable=['RH_6', 'Windspeed', 'Tdewpoint', 'rv2']
+
+#Feature set not to be scaled
+non_scalable_columns=['month_2', 'month_3',
+       'month_4', 'month_5', 'time_of_day_night_time',
+       'time_of_day_sleep_time', 'time_of_day_work_hours', 'weekday_0',
+       'weekday_2', 'weekday_3', 'weekday_4', 'weekday_5', 'weekday_6']
+
+# Dependent Variables
+dep_var=['Appliances']
+
 
 # Invoking function to import source files
 energy_source_data=import_source_files(config_file_name)
 # Invoking function to create new features
 energy_source_data_features=feature_engineering(energy_source_data)
 #Invoking function to calculate variance inflation factor
-energy_source_data_workset=calculate_vif(energy_source_data_features[independent_updated],10.0)
+energy_source_data_vif=calculate_vif(energy_source_data_features[independent_updated],10.0)
+#Invoking function to pre-process the data (scaling the numeric features) and splitting train test data
+train_set, test_set=data_preprocess(energy_source_data_vif)
 
