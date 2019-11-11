@@ -1,0 +1,12 @@
+To run the scripts, individually for two datasets, please execute python3 as3_energy_applaince.py or python 3 as3_kickstarter_mains.py
+The requisite packages all compatible with python3 are imported in the beginning section of the files.
+Please also refer to the excel (graphs images scrap), as it has individual snippets of the plots and figures,  incase referrence is needed.
+
+Contents:
+as3_energy_applaince.py  : executable python code for energy applaince spike prediction
+as3_kickstarter_mains.py : executable python code for kickstarter 
+axs180036_hw3_report     : pdf of the report
+graphs_images_scrap      : collation of the images and graphs used pasted in the excel file; all of them are reproducible from the code
+
+Note on secondry dataset
+please use the latest version of the dataset named ks-projects-201801.csv https://www.kaggle.com/kemical/kickstarter-projects/download#ks-projects-201801.csv
